@@ -60,11 +60,6 @@ module.exports = (sequelize, DataTypes) => {
           isBoolean: true,
         },
       },
-      metadata: {
-        type: DataTypes.JSON,
-        allowNull: true,
-        comment: "Store additional information like late fee details"
-      },
     },
     {
       tableName: "Fees",
