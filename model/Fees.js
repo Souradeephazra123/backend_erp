@@ -1,5 +1,4 @@
 module.exports = (sequelize, DataTypes) => {
-  
   const Fee = sequelize.define(
     "Fee",
     {
