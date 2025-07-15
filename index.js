@@ -28,7 +28,7 @@ const path = require("path");
 app.use(cors());
 
 // create table if not exist
-db.seqeulize.sync();
+// db.seqeulize.sync();
 let feesData = [];
 
 // Route to get all fees or filter by section
