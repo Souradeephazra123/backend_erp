@@ -1,8 +1,12 @@
 const { QueryTypes } = require("sequelize");
 const db = require("../../config/dbConfig");
+const log4js = require("log4js");
+const logger = log4js.getLogger();
 
 // Create Fee
 const createFee = async (req, res) => {
+  logger.info("createFee function called");
+  logger.debug("Request body:", JSON.stringify(req.body, null, 2));
   console.log("Request body:", req.body);
 
   const {
@@ -31,6 +35,7 @@ const createFee = async (req, res) => {
   `;
 
   try {
+    logger.debug("Starting fee creation process");
     // Validate input
     const FeeAmount = parseFloat(fee_amount);
     const Pay = parseFloat(amount_paid) || 0;
@@ -39,25 +44,34 @@ const createFee = async (req, res) => {
     const subcategoryId = parseInt(fee_subcategory);
     const paymentDate = new Date().toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
 
+    logger.debug(
+      `Parsed values: FeeAmount=${FeeAmount}, Pay=${Pay}, discountAmount=${discountAmount}, studentId=${studentId}, subcategoryId=${subcategoryId}`
+    );
+
     // Basic validation
     if (isNaN(FeeAmount) || FeeAmount <= 0) {
+      logger.warn(`Invalid fee amount provided: ${fee_amount}`);
       return res.status(400).json({
         message: "Invalid fee amount",
       });
     }
 
     if (Pay > FeeAmount) {
+      logger.warn(`Payment amount ${Pay} exceeds fee amount ${FeeAmount}`);
       return res.status(400).json({
         message: "Payment amount cannot exceed the total fee amount",
       });
     }
     const remainingFee = FeeAmount - Pay - discountAmount;
+    logger.debug(`Calculated remaining fee: ${remainingFee}`);
 
     // Begin transaction
+    logger.debug("Starting database transaction");
     const transaction = await db.seqeulize.transaction();
 
     try {
       // Insert fee record
+      logger.debug("Inserting fee record into database");
       const [feeResult] = await db.seqeulize.query(sqlInsertFee, {
         replacements: {
           FeeAmount,
@@ -72,9 +86,11 @@ const createFee = async (req, res) => {
 
       // Get the ID of the newly created fee record
       const feeId = feeResult; // Assuming the ID is returned as the first element
+      logger.debug(`Fee record created with ID: ${feeId}`);
 
       // Insert payment history record if any payment is made
       if (Pay > 0) {
+        logger.debug(`Inserting payment history record for amount: ${Pay}`);
         await db.seqeulize.query(sqlInsertPaymentHistory, {
           replacements: {
             studentId,
@@ -87,6 +103,7 @@ const createFee = async (req, res) => {
           type: QueryTypes.INSERT,
           transaction,
         });
+        logger.debug("Payment history record inserted successfully");
       }
 
       // Handle discount if provided

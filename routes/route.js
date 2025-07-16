@@ -5,6 +5,8 @@ const cors = require("cors");
 const db = require("../config/dbConfig");
 const app = express();
 const multer = require("multer");
+const log4js = require("log4js");
+const logger = log4js.getLogger();
 
 // cors middleware
 app.use(cors());
@@ -85,12 +87,15 @@ const upload = multer({
 const FeeSubCategory = db.FeeSubCategory;
 const getFeeSubCategoriesByClass = async (req, res) => {
   const { classId } = req.params;
+  logger.info(`GET /feesubcategories/${classId} endpoint was hit.`);
 
   if (!classId) {
+    logger.warn("Class ID is missing in request");
     return res.status(400).json({ error: "Class ID is required" });
   }
 
   try {
+    logger.debug(`Fetching fee subcategories for classId: ${classId}`);
     // Fetch subcategories with a Sequelize query
     const subcategories = await db.seqeulize.query(
       `SELECT 
@@ -111,9 +116,12 @@ const getFeeSubCategoriesByClass = async (req, res) => {
       }
     );
 
+    logger.debug(
+      `Successfully fetched ${subcategories.length} subcategories for classId: ${classId}`
+    );
     res.json(subcategories);
   } catch (error) {
-    console.error("Error fetching subcategories:", error);
+    logger.error("Error fetching subcategories:", error);
     res
       .status(500)
       .json({ error: "An error occurred while fetching the data" });
@@ -124,14 +132,21 @@ app.get("/feesubcategories/:classId", getFeeSubCategoriesByClass);
 
 app.post("/api/payCarryForwardFee", async (req, res) => {
   const { studentId, paymentAmount } = req.body;
+  logger.info(
+    `POST /api/payCarryForwardFee endpoint was hit for studentId: ${studentId}`
+  );
 
   if (!studentId || !paymentAmount) {
+    logger.warn("Missing required fields: studentId or paymentAmount");
     return res
       .status(400)
       .json({ message: "Student ID and payment amount are required." });
   }
 
   try {
+    logger.debug(
+      `Processing carry forward fee payment: studentId=${studentId}, amount=${paymentAmount}`
+    );
     // Start a transaction
     const transaction = await db.seqeulize.transaction();
 
@@ -142,12 +157,19 @@ app.post("/api/payCarryForwardFee", async (req, res) => {
     );
 
     if (!student) {
+      logger.warn(`Student not found for ID: ${studentId}`);
       return res.status(404).json({ message: "Student not found." });
     }
 
     const currentFee = student.carryForwardFee;
+    logger.debug(
+      `Current carry forward fee for student ${studentId}: ${currentFee}`
+    );
 
     if (paymentAmount > currentFee) {
+      logger.warn(
+        `Payment amount ${paymentAmount} exceeds carry forward fee ${currentFee} for student ${studentId}`
+      );
       return res
         .status(400)
         .json({ message: "Payment amount exceeds the carry forward fee." });
@@ -175,6 +197,9 @@ app.post("/api/payCarryForwardFee", async (req, res) => {
 
     // Commit the transaction
     await transaction.commit();
+    logger.info(
+      `Successfully processed carry forward fee payment for student ${studentId}. PaymentId: ${paymentId}`
+    );
 
     return res.status(200).json({
       message: "Payment successful.",
@@ -183,6 +208,7 @@ app.post("/api/payCarryForwardFee", async (req, res) => {
     });
   } catch (err) {
     console.error("Transaction error:", err);
+    logger.error("Transaction error during carry forward fee payment:", err);
     return res
       .status(500)
       .json({ message: "An error occurred during payment.", error: err });
@@ -192,6 +218,8 @@ app.post("/api/payCarryForwardFee", async (req, res) => {
 app.get("/api/payment/carry/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    logger.info(`GET /api/payment/carry/${id} endpoint was hit.`);
+
     const query = `
     SELECT 
     *
@@ -199,6 +227,7 @@ app.get("/api/payment/carry/:id", async (req, res) => {
     WHERE id =:id
 `;
 
+    logger.debug(`Fetching payment details for payment id: ${id}`);
     // Execute the SQL query
     const studentFeesDetails = await db.seqeulize.query(query, {
       type: db.seqeulize.QueryTypes.SELECT,
@@ -207,15 +236,18 @@ app.get("/api/payment/carry/:id", async (req, res) => {
 
     // Check if the student has fees details
     if (studentFeesDetails.length === 0) {
+      logger.warn(`No payment details found for payment id: ${id}`);
       return res
         .status(404)
         .json({ message: "No fee details found for the student." });
     }
 
+    logger.debug(`Successfully fetched payment details for payment id: ${id}`);
     // Respond with the fetched student fees details
     res.json(studentFeesDetails[0]);
   } catch (error) {
     console.error("Error fetching student fees details:", error);
+    logger.error("Error fetching student fees details:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -224,14 +256,20 @@ app.post("/students/mass-upload", upload.single("file"), massUploadStudents);
 
 const getAllSchool = async (req, res) => {
   try {
+    logger.info("GET /api/school endpoint was hit.");
     const sql = "SELECT * FROM Schools";
+    logger.debug("Fetching all schools from database");
+
     const data = await db.seqeulize.query(sql, {
       type: db.Sequelize.QueryTypes.SELECT,
     });
+
+    logger.debug(`Successfully fetched ${data.length} schools from database`);
     console.log(data);
     res.status(200).json(data);
   } catch (err) {
     console.error("Failed to retrieve School:", err);
+    logger.error("Failed to retrieve School:", err);
     res.status(500).json({ message: "Failed to retrieve school" });
   }
 };

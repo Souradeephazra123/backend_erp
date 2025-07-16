@@ -3,6 +3,9 @@ const moment = require("moment");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const log4js = require("log4js");
+const logger = log4js.getLogger();
+
 // TODO profile change
 const profile = "Student";
 
@@ -13,8 +16,10 @@ const FeeSubCategories = db.FeeSubCategory;
 const Fees = db.Fee;
 
 module.exports.addStudent = async (req, res) => {
+  logger.info("addStudent function called");
   const transaction = await db.seqeulize.transaction(); // Start a transaction
   try {
+    logger.debug("addStudent request body:", JSON.stringify(req.body, null, 2));
     console.log("addStudent: ", req.body);
 
     const {

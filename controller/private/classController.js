@@ -2,22 +2,32 @@ const Class = require("../../model/classModel");
 const Division = require("../../model/divisionModel");
 const db = require("../../config/dbConfig");
 const { QueryTypes } = require("sequelize");
+const log4js = require("log4js");
+const logger = log4js.getLogger();
+
 const Student = db.Student;
 
 // Create a new class
 exports.createClass = async (req, res) => {
   const { class_name } = req.body;
+  logger.info("createClass function called");
+  logger.debug(`Creating class with name: ${class_name}`);
+
   if (!class_name) {
+    logger.warn("Class creation failed: class_name is required");
     return res.status(400).json({ message: "Class name is required" });
   }
 
   try {
+    logger.debug("Executing class creation in database");
     const result = await Class.createClass(class_name);
+    logger.info(`Class created successfully with ID: ${result.insertId}`);
     res.status(201).json({
       message: "Class created successfully",
       classId: result.insertId,
     });
   } catch (err) {
+    logger.error("Failed to create class:", err);
     console.error("Failed to create class:", err);
     res.status(500).json({ message: "Failed to create class" });
   }
@@ -26,7 +36,9 @@ exports.createClass = async (req, res) => {
 // Get all classes
 exports.getAllClasses = async (req, res) => {
   try {
+    logger.info("getAllClasses function called");
     const { id } = req.params;
+    logger.debug(`Fetching classes with parameter id: ${id}`);
 
     if (!id) {
       return res.status(400).json({ message: "school_id is required" });

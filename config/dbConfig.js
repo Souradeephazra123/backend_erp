@@ -1,4 +1,6 @@
 const Sequelize = require("sequelize");
+const log4js = require("log4js");
+const logger = log4js.getLogger();
 
 // const dbName = "bikashvi_apierp";
 // const dbUser = "bikashvi_usererp";
@@ -18,8 +20,10 @@ const seqeulize = new Sequelize(dbName, dbUser, dbPassword, {
 
 try {
   seqeulize.authenticate();
+  logger.info("DB Connection has been established successfully.");
   console.log("DB Connection has been established successfully.");
 } catch (error) {
+  logger.error("Unable to connect to the database:", error);
   console.error("Unable to connect to the database:", error);
 }
 
