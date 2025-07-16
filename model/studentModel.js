@@ -70,50 +70,50 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         allowNull: false,
       },
       dobPlace: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       bloodGrp: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(10),
+        allowNull: true,
       },
       photo: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       identificationMark1: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
         defaultValue: "",
       },
       identificationMark2: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
         defaultValue: "",
       },
       fatherName: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       motherName: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       guardianName: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
         defaultValue: "",
       },
       religion: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
-
       category: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       nationality: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       mobileNo: {
@@ -157,7 +157,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         defaultValue: null,
       },
       password: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: false,
         validate: {
           notEmpty: true,
@@ -173,7 +173,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         defaultValue: null,
       },
       gender: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(10),
         allowNull: false,
       },
       weight: {
@@ -185,54 +185,54 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         allowNull: true,
       },
       country: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       state: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       city: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       district: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       pincode: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(10),
         allowNull: false,
         validate: {
           isNumeric: true,
         },
       },
       udiseCode: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: true,
       },
       penCode: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: true,
       },
       schoolType: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       classToBeAdmitted: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: true,
       },
       lastClassAttended: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: true,
       },
       lastSchoolAttended: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       fatherPhoto: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       fatherNumber: {
@@ -250,15 +250,15 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         },
       },
       fatherQualification: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       fatherOccupation: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       motherPhoto: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       motherNumber: {
@@ -276,11 +276,11 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         },
       },
       motherQualification: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       motherOccupation: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       guardianNumber: {
@@ -291,7 +291,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         },
       },
       relationWithGuardian: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: true,
       },
       emergencyContactNumber: {
@@ -310,7 +310,7 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         allowNull: false,
       },
       hostelType: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         defaultValue: null,
       },
     },
