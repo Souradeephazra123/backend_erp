@@ -2,11 +2,11 @@ const authService = require("../../service/authService");
 
 exports.register = async (req, res) => {
   console.log("Register: ", req.body);
-  const { username, password, userType } = req.body;
+  const { userName, userPassword, userType } = req.body;
   try {
     const status = await authService.register(
-      username.trim(),
-      password,
+      userName.trim(),
+      userPassword,
       userType
     );
     res.status(201).send({
@@ -20,10 +20,10 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
+  const { userName, userPassword } = req.body;
 
   try {
-    const result = await authService.login(username, password);
+    const result = await authService.login(userName, userPassword);
 
     res.json(result);
   } catch (err) {

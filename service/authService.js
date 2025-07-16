@@ -10,12 +10,12 @@ const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;
 const refreshTokens = [];
 
 const generateAccessToken = (user) => {
-  return jwt.sign({ username: user.username }, SECRET_KEY, { expiresIn: "1m" });
+  return jwt.sign({ username: user.userName }, SECRET_KEY, { expiresIn: "1m" });
 };
 
 const generateRefreshToken = (user) => {
   const refreshToken = jwt.sign(
-    { username: user.username },
+    { username: user.userName },
     REFRESH_SECRET_KEY,
     { expiresIn: "7d" }
   );
@@ -24,12 +24,12 @@ const generateRefreshToken = (user) => {
   return refreshToken;
 };
 
-exports.register = async (username, password, userType) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
+exports.register = async (userName, userPassword, userType) => {
+  const hashedPassword = await bcrypt.hash(userPassword, 10);
   //   todo add user to database
-  console.log(username, password, userType);
+  console.log(userName, userPassword, userType);
   const userObj = {
-    userName: username,
+    userName: userName,
     userPassword: hashedPassword,
     userType: userType,
   };
@@ -38,12 +38,12 @@ exports.register = async (username, password, userType) => {
   return addUser;
 };
 
-exports.login = async (username, password) => {
+exports.login = async (userName, userPassword) => {
   const user = await User.findOne({
-    where: { userName: username.toLowerCase() },
+    where: { userName: userName.toLowerCase() },
   });
 
-  if (user && (await bcrypt.compare(password, user.userPassword))) {
+  if (user && (await bcrypt.compare(userPassword, user.userPassword))) {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
     return {
