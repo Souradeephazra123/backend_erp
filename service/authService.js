@@ -25,17 +25,33 @@ const generateRefreshToken = (user) => {
 };
 
 exports.register = async (userName, userPassword, userType) => {
-  const hashedPassword = await bcrypt.hash(userPassword, 10);
-  //   todo add user to database
-  console.log(userName, userPassword, userType);
-  const userObj = {
-    userName: userName,
-    userPassword: hashedPassword,
-    userType: userType,
-  };
-  // add user to db
-  const addUser = await User.create(userObj);
-  return addUser;
+  try {
+    console.log("Registering user:", { userName, userType });
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      where: { userName: userName },
+    });
+
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+    const userObj = {
+      userName: userName,
+      userPassword: hashedPassword,
+      userType: userType,
+    };
+
+    console.log("Creating user with data:", userObj);
+    const addUser = await User.create(userObj);
+    console.log("User created successfully:", addUser.userId);
+    return addUser;
+  } catch (error) {
+    console.error("Error in register service:", error);
+    throw error;
+  }
 };
 
 exports.login = async (userName, userPassword) => {

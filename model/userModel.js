@@ -22,8 +22,10 @@ module.exports = (sequelize, Sequelize) => {
       },
       userType: {
         type: Sequelize.STRING,
-        values: Type,
         allowNull: false,
+        validate: {
+          isIn: [Type]
+        }
       },
       userPassword: {
         type: Sequelize.STRING,
