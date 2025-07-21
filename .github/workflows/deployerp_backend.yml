@@ -1,0 +1,28 @@
+name: 🚀 Publish Website to cPanel
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment only when changes are pushed to main branch
+
+jobs:
+  FTP-Deploy:
+    name: 📂 FTP Deploy to cPanel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: 📤 Upload via FTP to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          server-dir: /hi.bikashvidyalaya.com/erp_greenschool/     # Change this path to match your cPanel hosting root
+          # local-dir: ./build/           # Change to your local build folder if different
