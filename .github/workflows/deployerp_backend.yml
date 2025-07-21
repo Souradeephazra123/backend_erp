@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 2
 
       - name: 📤 Upload via FTP to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
