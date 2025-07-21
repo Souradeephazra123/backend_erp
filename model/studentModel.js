@@ -149,7 +149,6 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       },
       regdNo: {
         type: Sequelize.INTEGER,
-
         allowNull: true,
       },
       bus_route_id: {

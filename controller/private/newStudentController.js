@@ -17,6 +17,7 @@ const Fees = db.Fee;
 
 module.exports.addStudent = async (req, res) => {
   logger.info("addStudent function called");
+  logger.debug("Request body received:", JSON.stringify(req.body, null, 2));
   const transaction = await db.seqeulize.transaction(); // Start a transaction
   try {
     logger.debug("addStudent request body:", JSON.stringify(req.body, null, 2));
@@ -61,23 +62,63 @@ module.exports.addStudent = async (req, res) => {
       mother_aadhar,
     } = req.body;
 
+    // Input validation
+    logger.info("Validating input data");
+    
+    // Validate required fields
+    if (!academic_year || !first_name || !last_name || !class_id || !division_id || !uid_no || !dob || !mobile_no || !email_id || !gender) {
+      logger.error("Missing required fields");
+      return res.status(400).send({ error: "Missing required fields" });
+    }
+
+    // Validate regdNo - it should be a string and not empty
+    if (!regdNo || regdNo.trim() === '') {
+      logger.error("Registration number is required");
+      return res.status(400).send({ error: "Registration number is required" });
+    }
+
+    // Validate mobile numbers (should be exactly 10 digits if provided)
+    if (mobile_no && (!/^\d{10}$/.test(mobile_no))) {
+      logger.error(`Invalid mobile number format: ${mobile_no}`);
+      return res.status(400).send({ error: "Mobile number must be exactly 10 digits" });
+    }
+
+    if (alternate_mobile_no && alternate_mobile_no.trim() !== '' && (!/^\d{10}$/.test(alternate_mobile_no))) {
+      logger.error(`Invalid alternate mobile number format: ${alternate_mobile_no}`);
+      return res.status(400).send({ error: "Alternate mobile number must be exactly 10 digits" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email_id)) {
+      logger.error(`Invalid email format: ${email_id}`);
+      return res.status(400).send({ error: "Invalid email format" });
+    }
+
+    logger.info("Input validation completed successfully");
+
     if (!req.file) {
+      logger.error("Image not uploaded - req.file is missing");
       return res.status(400).send("Image not uploaded.");
     }
 
     // Format image URL
     const imageUrl = `/uploads/${req.file.filename}`;
+    logger.debug(`Image uploaded successfully: ${imageUrl}`);
 
     // Parse dob and format it for the database and password creation
     const parsedDob = moment(dob, "YYYY-MM-DD");
     const dobFormatted = parsedDob.format("YYYY-MM-DD");
+    logger.debug(`Date of birth processing - Original: ${dob}, Formatted: ${dobFormatted}`);
 
     if (!parsedDob.isValid()) {
+      logger.error(`Invalid date format for DOB: ${dob}`);
       return res.status(400).send("Invalid date format for DOB.");
     }
 
     const forPassword = parsedDob.format("DD/MM/YYYY"); // Use for password creation
     const password = await bcrypt.hash(forPassword, 10); // Hash the password
+    logger.debug("Password generated and hashed successfully");
 
     const studentObj = {
       academic_year_id: academic_year,
@@ -105,16 +146,30 @@ module.exports.addStudent = async (req, res) => {
       nationality: nationality,
       bus_route_id: bus_route,
       mobileNo: mobile_no,
-      alternateMobileNo: alternate_mobile_no,
+      alternateMobileNo: alternate_mobile_no && alternate_mobile_no.trim() !== '' ? alternate_mobile_no : null,
       emailId: email_id,
       password: password,
       regdNo: regdNo,
       gender: gender,
       hostelType: hostelType,
+      // Required fields that were missing
+      country: country?.value || country,
+      state: state,
+      city: city,
+      district: district,
+      pincode: pincode,
+      schoolType: 'Regular', // Default value, you might want to add this field to the form
+      emergencyContactNumber: mobile_no, // Using mobile_no as emergency contact, you might want to add a separate field
+      permanentAddress: permanent_address,
+      presentAddress: present_address,
     };
 
+    logger.debug("Student object created:", JSON.stringify(studentObj, null, 2));
+
     // Save student in the database
+    logger.info("Attempting to create student in database");
     const newStudent = await Student.create(studentObj, { transaction });
+    logger.info(`Student created successfully with ID: ${newStudent.id}`);
 
     // Create address object and save
     const addressObj = {
@@ -130,6 +185,9 @@ module.exports.addStudent = async (req, res) => {
       country: country?.value,
     };
     const address = await Address.create(addressObj, { transaction });
+    logger.debug("Address object created:", JSON.stringify(addressObj, null, 2));
+    logger.info("Attempting to create address in database");
+    logger.info(`Address created successfully for student ID: ${newStudent.id}`);
 
     // Check if class_id exists in FeeSubCategories
     const feeSubCategories = await db.seqeulize.query(
@@ -174,7 +232,25 @@ module.exports.addStudent = async (req, res) => {
     });
   } catch (error) {
     if (transaction) await transaction.rollback(); // Rollback transaction on error
+    logger.error("Error in addStudent function:", error);
     console.error(error);
+    
+    // Check if it's a validation error and provide more specific details
+    if (error.name === 'SequelizeValidationError') {
+      logger.error("Validation errors:", error.errors.map(err => ({
+        field: err.path,
+        message: err.message,
+        value: err.value
+      })));
+      return res.status(400).send({ 
+        error: "Validation failed", 
+        details: error.errors.map(err => ({
+          field: err.path,
+          message: err.message
+        }))
+      });
+    }
+    
     return res.status(500).send({ error: "Student not added" });
   }
 };
