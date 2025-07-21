@@ -19,10 +19,10 @@ jobs:
       - name: 📤 Upload via FTP to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v3.1.1
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          server-dir: /hi.bikashvidyalaya.com/erp_greenschool/     # Change this path to match your cPanel hosting root
+          ftp-server: ${{ secrets.FTP_SERVER }}
+          ftp-username: ${{ secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          # protocol: ftp
+          # port: 21
+          # server-dir: /hi.bikashvidyalaya.com/erp_greenschool/     # Change this path to match your cPanel hosting root
           # local-dir: ./build/           # Change to your local build folder if different
